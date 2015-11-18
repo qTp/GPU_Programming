@@ -99,7 +99,7 @@ int main(int argc, char **argv){
 		dimGrid.z = 1;
 
 	}else{
-		printf("Falsche Parameter Anzahl!\n width blockX blockY !");
+		printf("Falsche Parameter Anzahl!\n width blockX blockY!\n\n");
 		exit(-1);
 	}
 

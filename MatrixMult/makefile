@@ -1,4 +1,4 @@
-buid: matrixmult.exe
+build: matrixmult.exe
 	#Do some stuff
 
 clean:
