@@ -1,5 +1,5 @@
-#ifndef _CUDATOOL_H_
-#define _CUDATOOL_H_
+#ifndef _CUDATOOL_H
+#define _CUDATOOL_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,4 +9,4 @@
 
 void cudaErr(cudaError_t err);
 
-#endif
+#endif /* _CUDATOOL_H */

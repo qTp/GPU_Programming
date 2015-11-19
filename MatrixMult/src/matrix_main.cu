@@ -1,46 +1,13 @@
-
 #include <stdbool.h>
-
+#include <string.h>
 #include <math.h>
 #include <time.h>
 #include <omp.h>
 
 #include "../header/cudatool.h"
+#include "../header/matrixmult.h"
 
 #define BLOCK_WIDTH 16
-
-
-//parallel MatrixMult
-__global__ void cudaMatrixMult(float *d_M, float *d_N, double *d_P, int width){
-	//Berechne die Reihe/Zeile (ROW)
-	int row = blockIdx.y*blockDim.y + threadIdx.y;
-	//Berechne die Spalte (COLUMN)
-	int col = blockIdx.x*blockDim.x + threadIdx.x;
-
-	//Nur berechnen wenn die Zeile/Spalte noch in der Matrix ist! Wichtig!
-	//Da hier auch Threads erstellt werden die nicht in der Matrix liegen.
-	if ((row < width) && (col < width)){
-		double Pvalue = 0;
-		//jeder Thread berechnet genau ein Element der Ergebnismatrix
-		for (int k = 0; k < width; k++){
-			Pvalue += d_M[row*width + k] * d_N[k*width + col];
-		}
-		d_P[row*width + col] = Pvalue;
-	}
-}
-
-//serial MatrixMult
-void serialMatrixMult(float *M, float *N, double *P, int width){
-	for (int i = 0; i < width; i++){
-		for (int j = 0; j < width; j++){
-			double sum = 0;
-			for (int k = 0; k < width; k++){
-				sum +=  M[i*width + k] * N[k*width + j];
-			}
-			P[i*width + j] = sum;
-		}
-	}
-}
 
 //Matrix fuellen
 void initMatrix(float *ip, int size){
@@ -54,18 +21,18 @@ void initMatrix(float *ip, int size){
 }
 
 //Matrix gegen einander testen
-bool checkMatrix(double *Pserial, double *Pkernel, int N){
+bool checkMatrix(double *Pserial, double *Pkernel, int N, char string[20]){
 	double epsilon = 1.0e-8; //Fehlertoleranz
 	bool match = 1;
 	for (int i = 0; i < N; i++){
 		if (abs(Pserial[i] - Pkernel[i]) > epsilon){
 			match = 0;
-			printf("Arrays do not match!\n");
+			printf("Arrays do not match between %s!\n", string);
 			printf("host:\n%5.10f\ngpu:\n%5.10f\nat Element %d\n", Pserial[i], Pkernel[i], i);
 			break;
 		}
 	}
-	if (match) printf("Arrays match.\n\n");
+	if (match) printf("Arrays match between %s.\n\n", string);
 	return match;
 }
 
@@ -74,7 +41,7 @@ int main(int argc, char **argv){
 	int h_arraySize;// groesse der Matrix = width * width
 	int memSize = 0;
 	int memSizeErg = 0;
-
+	char cBetween[20];
 	//variable for time calc
 	double tStart = 0;
 	double tEnd = 0;
@@ -130,7 +97,7 @@ int main(int argc, char **argv){
 	//Device-Ergebnis array initialisieren
 	cudaErr(cudaMalloc((void**)&d_Pk, memSizeErg));
 
-	//Matrix mit zuf�lligen Werten fuellen
+	//Matrix mit zufaelligen Werten fuellen
 	initMatrix(h_M, h_arraySize);
 	initMatrix(h_N, h_arraySize);
 
@@ -159,13 +126,15 @@ int main(int argc, char **argv){
 	cudaMatrixMult<<<dimGrid, dimBlock>>>(d_M, d_N, d_Pk, h_width);
 	cudaErr(cudaDeviceSynchronize());
 	tEnd = omp_get_wtime();
-	printf("Finish GPU MatrixMultin %f ms\n\n", 1.e3*(tEnd - tStart));
+	printf("Finish GPU MatrixMult in %f ms\n\n", 1.e3*(tEnd - tStart));
 
 	//Ergebnis kopieren
 	cudaErr(cudaMemcpy(h_Pk, d_Pk, memSizeErg, cudaMemcpyDeviceToHost));
 
 	//Matrix testen
-	checkMatrix(h_Ps, h_Pk, h_arraySize);
+	//memset(cBetween,'\0' ,sizeof(cBetween));
+	strcpy(cBetween, "CPU - GPU");
+	checkMatrix(h_Ps, h_Pk, h_arraySize,cBetween);
 
 	//Alles befreien
 	free(h_M);
