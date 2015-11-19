@@ -1,25 +1,47 @@
-build: matrixmult.exe
-#Do some stuff
+MKDIR_P = mkdir -p
+DEBUG_DIR = debug
+OUT_O_DIR = ${DEBUG_DIR}/objects
+SRC_DIR = src
+HEADER_DIR = header
+CC = nvcc
+CFLAGS = -c -o
+LFLAGS =
+LINK_TARGET = MatrixMultTool.exe
+
+OBJECTS = $(OUT_O_DIR)/cudatool.obj \
+ 					$(OUT_O_DIR)/matrix_mult.obj \
+					$(OUT_O_DIR)/main.obj
+
+.PHONY: directories cleanCMD cleanall clean
+
+all: cleanCMD directories $(LINK_TARGET)
+	### All done! ###
 
 clean:
-	 rm -f debug/matrixmult*.*
+	 rm -f ${DEBUG_DIR}/*.*
 
 cleanall:
-	rm -f debug/*
+	rm -rf ${DEBUG_DIR}
 
-debug/matrix_mult.obj: src/matrixmult.cu header/matrixmult.h
-	nvcc -c src/matrixmult.cu -o debug/matrix_mult.obj
+directories: ${DEBUG_DIR} ${OUT_O_DIR}
 
-debug/cudatool.obj: src/cudatool.cu header/cudatool.h
-	nvcc -c src/cudatool.cu -o debug/cudatool.obj
+${OUT_O_DIR}:
+	${MKDIR_P} ${OUT_O_DIR}
 
-debug/matrix_main.obj: src/matrix_main.cu
-	nvcc -c src/matrix_main.cu -o debug/matrix_main.obj
+${DEBUG_DIR}:
+		${MKDIR_P} ${DEBUG_DIR}
 
-matrixmult.exe: cleanCMD debug/cudatool.obj debug/matrix_mult.obj debug/matrix_main.obj
-	nvcc debug/cudatool.obj debug/matrix_mult.obj debug/matrix_main.obj -o debug/matrixmult.exe
+${OUT_O_DIR}/matrix_mult.obj: ${SRC_DIR}/matrixmult.cu  ${HEADER_DIR}/matrixmult.h ${HEADER_DIR}/cudatool.h
+	${CC} $(CFLAGS) ${OUT_O_DIR}/matrix_mult.obj ${SRC_DIR}/matrixmult.cu
+
+${OUT_O_DIR}/cudatool.obj: ${SRC_DIR}/cudatool.cu  ${HEADER_DIR}/cudatool.h
+	${CC} $(CFLAGS) ${OUT_O_DIR}/cudatool.obj ${SRC_DIR}/cudatool.cu
+
+${OUT_O_DIR}/main.obj: ${SRC_DIR}/main.cu ${HEADER_DIR}/matrixmult.h ${HEADER_DIR}/cudatool.h
+	${CC} $(CFLAGS) ${OUT_O_DIR}/main.obj ${SRC_DIR}/main.cu
+
+$(LINK_TARGET): $(OBJECTS)
+	${CC} $(LFLAGS) $(OBJECTS) -o ${DEBUG_DIR}/$(LINK_TARGET)
 
 cleanCMD:
 	cls #clean WindowsCMD
-
-#make sollte auch debug folder erstellen

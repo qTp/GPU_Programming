@@ -66,13 +66,13 @@ int main(int argc, char **argv){
 		dimGrid.z = 1;
 
 	}else{
-		printf("Falsche Parameter Anzahl!\n width blockX blockY!\n\n");
+		printf("Falsche Parameter Anzahl!\nwidth blockX blockY!\n\n");
 		exit(-1);
 	}
 
 	//Bestimmen der KERNEL Parameter ( GRID Dim & BLOCK Dim )
-//	numBlocks = ceil((float) h_width / BLOCK_WIDTH );
-	printf("Blocks= %d|%d for w: %d , Grid: %d|%d\n", dimBlock.x, dimBlock.y, h_width, dimGrid.x,dimGrid.y);
+	//numBlocks = ceil((float) h_width / BLOCK_WIDTH );
+	printf("Grid: %d|%d|%d and Block: %d|%d|%d for width: %d , \n", dimGrid.x,dimGrid.y,dimGrid.z, dimBlock.x, dimBlock.y,dimBlock.z, h_width);
 	//dim3 dimGrid(numBlocks, numBlocks);
 	//dim3 dimBlock(BLOCK_WIDTH,BLOCK_WIDTH);
 
@@ -133,7 +133,7 @@ int main(int argc, char **argv){
 
 	//Matrix testen
 	//memset(cBetween,'\0' ,sizeof(cBetween));
-	strcpy(cBetween, "CPU - GPU");
+	strcpy(cBetween, "CPU - GPU w\\o smem");
 	checkMatrix(h_Ps, h_Pk, h_arraySize,cBetween);
 
 	//Alles befreien
