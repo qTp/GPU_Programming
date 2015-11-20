@@ -1,13 +1,4 @@
-#include <stdbool.h>
-#include <string.h>
-#include <math.h>
-#include <time.h>
-#include <omp.h>
-
-#include "../header/cudatool.h"
-#include "../header/matrixmult.h"
-
-#define BLOCK_WIDTH 16
+#include "../header/main.h"
 
 //Matrix fuellen
 void initMatrix(float *ip, int size){
@@ -15,16 +6,16 @@ void initMatrix(float *ip, int size){
 	time_t t;
 	srand((unsigned)time(&t));
 	//Matrix auffuellen
-	for (int i = 0; i < size; i++){
+	for (int i = 0; i < size; ++i){
 		ip[i] = (float)(rand() & 0xFF) / 10.0f;
 	}
 }
 
 //Matrix gegen einander testen
-bool checkMatrix(double *Pserial, double *Pkernel, int N, char string[20]){
+bool checkMatrix(double *Pserial, double *Pkernel, int N, char string[40]){
 	double epsilon = 1.0e-8; //Fehlertoleranz
 	bool match = 1;
-	for (int i = 0; i < N; i++){
+	for (int i = 0; i < N; ++i){
 		if (abs(Pserial[i] - Pkernel[i]) > epsilon){
 			match = 0;
 			printf("Arrays do not match between %s!\n", string);
@@ -51,7 +42,8 @@ int main(int argc, char **argv){
 	float *d_M;//Matrix 1 -> device = gpu <- im Devices-Speicher!
 	float *d_N;//Matrix 2 -> device = gpu <- im Devices-Speicher!
 	double *h_Ps;//Ergebnis serial
-	double *h_Pk;//Ergebnis kernel
+	double *h_Pk;//Ergebnis kernel without shared mem
+	double *h_PkSmem;//Ergebnis kernel with shared mem
 	double *d_Pk;//Ergebnis kernel <- im Devices-Speicher!
 	dim3 dimGrid, dimBlock;
 
@@ -71,10 +63,8 @@ int main(int argc, char **argv){
 	}
 
 	//Bestimmen der KERNEL Parameter ( GRID Dim & BLOCK Dim )
-	//numBlocks = ceil((float) h_width / BLOCK_WIDTH );
 	printf("Grid: %d|%d|%d and Block: %d|%d|%d for width: %d , \n", dimGrid.x,dimGrid.y,dimGrid.z, dimBlock.x, dimBlock.y,dimBlock.z, h_width);
-	//dim3 dimGrid(numBlocks, numBlocks);
-	//dim3 dimBlock(BLOCK_WIDTH,BLOCK_WIDTH);
+
 
 	//mit der width die Array groesse berechen
 	h_arraySize = h_width * h_width;
@@ -89,6 +79,7 @@ int main(int argc, char **argv){
 	//Host-Ergebnis Array initialisieren
 	h_Ps = (double*)malloc(memSizeErg);
 	h_Pk = (double*)malloc(memSizeErg);
+	h_PkSmem = (double*)malloc(memSizeErg);
 
 	//devices array allokieren
 	cudaErr(cudaMalloc((void**)&d_M, memSize));
@@ -121,20 +112,37 @@ int main(int argc, char **argv){
 	tEnd = omp_get_wtime();
 	printf("Finish GPU MatrixMult in %f ms\n\n", 1.e3*(tEnd - tStart));
 
-	printf("Start GPU MatrixMult jetzt aber richtig XD\n");
+	printf("Start GPU MatrixMult jetzt aber richtig.\n");
 	tStart = omp_get_wtime();
 	cudaMatrixMult<<<dimGrid, dimBlock>>>(d_M, d_N, d_Pk, h_width);
 	cudaErr(cudaDeviceSynchronize());
 	tEnd = omp_get_wtime();
 	printf("Finish GPU MatrixMult in %f ms\n\n", 1.e3*(tEnd - tStart));
-
 	//Ergebnis kopieren
 	cudaErr(cudaMemcpy(h_Pk, d_Pk, memSizeErg, cudaMemcpyDeviceToHost));
-
 	//Matrix testen
-	//memset(cBetween,'\0' ,sizeof(cBetween));
 	strcpy(cBetween, "CPU - GPU w\\o smem");
 	checkMatrix(h_Ps, h_Pk, h_arraySize,cBetween);
+
+	printf("Start GPU MatrixMult SharedMem aufwaermen.\n");
+	tStart = omp_get_wtime();
+	cudaMatrixMultWithSMem<<<dimGrid, dimBlock>>>(d_M, d_N, d_Pk, h_width);
+	cudaErr(cudaDeviceSynchronize());
+	tEnd = omp_get_wtime();
+	printf("Finish GPU MatrixMult SharedMem in %f ms\n\n", 1.e3*(tEnd - tStart));
+
+	printf("Start GPU MatrixMult SharedMem jetzt aber richtig..\n");
+	tStart = omp_get_wtime();
+	cudaMatrixMultWithSMem<<<dimGrid, dimBlock>>>(d_M, d_N, d_Pk, h_width);
+	cudaErr(cudaDeviceSynchronize());
+	tEnd = omp_get_wtime();
+	printf("Finish GPU MatrixMult SharedMem in %f ms\n\n", 1.e3*(tEnd - tStart));
+	//Ergebnis kopieren
+	cudaErr(cudaMemcpy(h_PkSmem, d_Pk, memSizeErg, cudaMemcpyDeviceToHost));
+	//Matrix testen
+	strcpy(cBetween, "CPU - GPU with smem");
+	checkMatrix(h_Ps, h_PkSmem, h_arraySize,cBetween);
+
 
 	//Alles befreien
 	free(h_M);

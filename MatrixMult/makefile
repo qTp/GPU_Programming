@@ -1,18 +1,24 @@
 MKDIR_P = mkdir -p
-DEBUG_DIR = debug
+DEBUG_DIR = ./debug
 OUT_O_DIR = ${DEBUG_DIR}/objects
-SRC_DIR = src
-HEADER_DIR = header
+SRC_DIR = ./src
+HEADER_DIR = ./header
 CC = nvcc
 CFLAGS = -c -o
 LFLAGS =
 LINK_TARGET = MatrixMultTool.exe
 
+MAIN = main
+CUDA_TOOL = cudatool
+MM_CPU = matrixmult_cpu
+MM_GPU = matrixmult_gpu
+
 OBJECTS = $(OUT_O_DIR)/cudatool.obj \
- 					$(OUT_O_DIR)/matrix_mult.obj \
+ 					$(OUT_O_DIR)/$(MM_CPU).obj \
+					$(OUT_O_DIR)/$(MM_GPU).obj \
 					$(OUT_O_DIR)/main.obj
 
-.PHONY: directories cleanCMD cleanall clean
+.PHONY: directories cleanCMD cleanall clean test
 
 all: cleanCMD directories $(LINK_TARGET)
 	### All done! ###
@@ -21,7 +27,7 @@ clean:
 	 rm -f ${DEBUG_DIR}/*.*
 
 cleanall:
-	rm -rf ${DEBUG_DIR}
+	rm -rf ${DEBUG_DIR} ${OUT_O_DIR}
 
 directories: ${DEBUG_DIR} ${OUT_O_DIR}
 
@@ -31,17 +37,25 @@ ${OUT_O_DIR}:
 ${DEBUG_DIR}:
 		${MKDIR_P} ${DEBUG_DIR}
 
-${OUT_O_DIR}/matrix_mult.obj: ${SRC_DIR}/matrixmult.cu  ${HEADER_DIR}/matrixmult.h ${HEADER_DIR}/cudatool.h
-	${CC} $(CFLAGS) ${OUT_O_DIR}/matrix_mult.obj ${SRC_DIR}/matrixmult.cu
+${OUT_O_DIR}/$(MM_CPU).obj: ${SRC_DIR}/$(MM_CPU).cu  ${HEADER_DIR}/$(MM_CPU).h ${HEADER_DIR}/${CUDA_TOOL}.h
+	${CC} $(CFLAGS) ${OUT_O_DIR}/$(MM_CPU).obj ${SRC_DIR}/$(MM_CPU).cu
 
-${OUT_O_DIR}/cudatool.obj: ${SRC_DIR}/cudatool.cu  ${HEADER_DIR}/cudatool.h
-	${CC} $(CFLAGS) ${OUT_O_DIR}/cudatool.obj ${SRC_DIR}/cudatool.cu
+${OUT_O_DIR}/$(MM_GPU).obj: ${SRC_DIR}/$(MM_GPU).cu  ${HEADER_DIR}/$(MM_GPU).h ${HEADER_DIR}/${CUDA_TOOL}.h
+	${CC} $(CFLAGS) ${OUT_O_DIR}/$(MM_GPU).obj ${SRC_DIR}/$(MM_GPU).cu
 
-${OUT_O_DIR}/main.obj: ${SRC_DIR}/main.cu ${HEADER_DIR}/matrixmult.h ${HEADER_DIR}/cudatool.h
-	${CC} $(CFLAGS) ${OUT_O_DIR}/main.obj ${SRC_DIR}/main.cu
+${OUT_O_DIR}/cudatool.obj: ${SRC_DIR}/${CUDA_TOOL}.cu  ${HEADER_DIR}/${CUDA_TOOL}.h
+	${CC} $(CFLAGS) ${OUT_O_DIR}/${CUDA_TOOL}.obj ${SRC_DIR}/${CUDA_TOOL}.cu
+
+${OUT_O_DIR}/main.obj: ${SRC_DIR}/${MAIN}.cu ${HEADER_DIR}/${MAIN}.h \
+	 										${HEADER_DIR}/$(MM_CPU).h ${HEADER_DIR}/$(MM_GPU).h \
+											${HEADER_DIR}/${CUDA_TOOL}.h
+	${CC} $(CFLAGS) ${OUT_O_DIR}/${MAIN}.obj ${SRC_DIR}/${MAIN}.cu
 
 $(LINK_TARGET): $(OBJECTS)
 	${CC} $(LFLAGS) $(OBJECTS) -o ${DEBUG_DIR}/$(LINK_TARGET)
 
 cleanCMD:
 	cls #clean WindowsCMD
+
+test:
+	cuda-memcheck debug\MatrixMultTool.exe 100 16 16
