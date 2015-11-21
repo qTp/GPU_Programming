@@ -3,6 +3,8 @@
 *.exp
 *.lib
 *.obj
+*.log
+*.pdb
 
 # Windows image file caches
 Thumbs.db

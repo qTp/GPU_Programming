@@ -42,7 +42,7 @@ __global__ void cudaMatrixMultWithSMem(float *d_M, float *d_N, double *d_P, int 
 			int globalAccesM = rowP*width+(m*TILE_WIDTH + thdX);
 			int globalAccesN = colP+(m*TILE_WIDTH + thdY)*width;
 
-			if ((globalAccesM < width) && (globalAccesN < width)){
+			if (( thdX < TILE_WIDTH ) && (thdY < TILE_WIDTH )){ //(globalAccesM < width) && (globalAccesN < width) && 
 				//Alle Threads in diesem Block!! Versorgen den Speicher mit d_M und d_N Elementen
 				Mds[thdY][thdX] = d_M[globalAccesM];
 				Mds[thdY][thdX] = d_M[globalAccesN];
@@ -50,12 +50,10 @@ __global__ void cudaMatrixMultWithSMem(float *d_M, float *d_N, double *d_P, int 
 
 				//Nach dem alle Threads im Block die Daten geladen haben wird jetzt die erste P Tile bestimmt
 				for( int k = 0; k < TILE_WIDTH; ++k){
-					if((thdY < TILE_WIDTH) && (thdX < TILE_WIDTH)){
-						pValue += Mds[thdY][k] * Nds[k][thdX];
-					}
+					pValue += Mds[thdY][k] * Nds[k][thdX];
 					__syncthreads();
 				}
 				d_P[rowP*width+colP] = pValue;
+			}
 		}
-	}
 }

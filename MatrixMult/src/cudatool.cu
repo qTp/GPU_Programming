@@ -1,9 +1,9 @@
 #include "../header/cudatool.h"
 
-void cudaErr(cudaError_t err){
+void cudaErrT(cudaError_t err, int line, char* file){
     if (err != cudaSuccess){
-      printf( "Cuda error in file '%s' in line %i : %s.",
-      __FILE__, __LINE__, cudaGetErrorString(err));
+      printf( "\n*** Cuda error in file '%s' in line %i : %s. ***\n\n",
+      file, line, cudaGetErrorString(err));
       exit(EXIT_FAILURE);
 		}
 }

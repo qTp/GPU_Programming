@@ -12,9 +12,9 @@ void initMatrix(float *ip, int size){
 }
 
 //Matrix gegen einander testen
-bool checkMatrix(double *Pserial, double *Pkernel, int N, char string[40]){
+void checkMatrix(double *Pserial, double *Pkernel, int N, char string[40]){
 	double epsilon = 1.0e-8; //Fehlertoleranz
-	bool match = 1;
+	int match = 1;
 	for (int i = 0; i < N; ++i){
 		if (abs(Pserial[i] - Pkernel[i]) > epsilon){
 			match = 0;
@@ -24,10 +24,10 @@ bool checkMatrix(double *Pserial, double *Pkernel, int N, char string[40]){
 		}
 	}
 	if (match) printf("Arrays match between %s.\n\n", string);
-	return match;
 }
 
 int main(int argc, char **argv){
+
 	int h_width;//Breite der Matrix
 	int h_arraySize;// groesse der Matrix = width * width
 	int memSize = 0;
@@ -45,7 +45,7 @@ int main(int argc, char **argv){
 	double *h_Pk;//Ergebnis kernel without shared mem
 	double *h_PkSmem;//Ergebnis kernel with shared mem
 	double *d_Pk;//Ergebnis kernel <- im Devices-Speicher!
-	dim3 dimGrid, dimBlock;
+	dim3 dimGrid, dimBlock, dimGridSMEM, dimBlockSMEM;
 
 	if(argc == 4){
 		h_width = atoi(argv[1]);
@@ -57,21 +57,30 @@ int main(int argc, char **argv){
 		dimGrid.y = ceil((float) h_width / dimBlock.y);
 		dimGrid.z = 1;
 
+		dimBlockSMEM.x = TILE_WIDTH;
+		dimBlockSMEM.y = TILE_WIDTH;
+		dimBlockSMEM.z = 1;
+
+		dimGridSMEM.x = ceil((float)h_width / TILE_WIDTH);
+		dimGridSMEM.y = ceil((float)h_width / TILE_WIDTH);
+		dimGridSMEM.z = 1;
+
 	}else{
 		printf("Falsche Parameter Anzahl!\nwidth blockX blockY!\n\n");
 		exit(-1);
 	}
 
 	//Bestimmen der KERNEL Parameter ( GRID Dim & BLOCK Dim )
-	printf("Grid: %d|%d|%d and Block: %d|%d|%d for width: %d , \n", dimGrid.x,dimGrid.y,dimGrid.z, dimBlock.x, dimBlock.y,dimBlock.z, h_width);
-
+	printf("Normal: Grid: %d|%d|%d and Block: %d|%d|%d for width: %d.\n", dimGrid.x,dimGrid.y,dimGrid.z, dimBlock.x, dimBlock.y,dimBlock.z, h_width);
+	printf("SMem: Grid: %d|%d|%d and Block: %d|%d|%d for width: %d.\n", dimGridSMEM.x,dimGridSMEM.y,dimGridSMEM.z, dimBlockSMEM.x, dimBlockSMEM.y,dimBlockSMEM.z, h_width);
 
 	//mit der width die Array groesse berechen
 	h_arraySize = h_width * h_width;
 
 	//Speichergroesse bestimmen
-	memSize = (sizeof(float)*h_arraySize);
+	memSize = sizeof(float)*h_arraySize;
 	memSizeErg = sizeof(double)*h_arraySize;
+
 	//Host Arrays allokieren
 	h_M = (float*)malloc(memSize);
 	h_N = (float*)malloc(memSize);
@@ -103,7 +112,7 @@ int main(int argc, char **argv){
 	serialMatrixMult(h_M, h_N, h_Ps, h_width);
 	tEnd = omp_get_wtime();
 	printf("Finish CPU MatrixMult in %f ms\n\n",1.e3*(tEnd - tStart));
-
+/*
 	//Matrix auf der GPU berechnen; am besten diverse GRID | BLOCK kompiationen Testen
 	printf("Start GPU MatrixMult aufwaermen\n");
 	tStart = omp_get_wtime();
@@ -123,17 +132,17 @@ int main(int argc, char **argv){
 	//Matrix testen
 	strcpy(cBetween, "CPU - GPU w\\o smem");
 	checkMatrix(h_Ps, h_Pk, h_arraySize,cBetween);
-
+*/
 	printf("Start GPU MatrixMult SharedMem aufwaermen.\n");
 	tStart = omp_get_wtime();
-	cudaMatrixMultWithSMem<<<dimGrid, dimBlock>>>(d_M, d_N, d_Pk, h_width);
+	cudaMatrixMultWithSMem<<<dimGridSMEM, dimBlockSMEM>>>(d_M, d_N, d_Pk, h_width);
 	cudaErr(cudaDeviceSynchronize());
 	tEnd = omp_get_wtime();
 	printf("Finish GPU MatrixMult SharedMem in %f ms\n\n", 1.e3*(tEnd - tStart));
 
 	printf("Start GPU MatrixMult SharedMem jetzt aber richtig..\n");
 	tStart = omp_get_wtime();
-	cudaMatrixMultWithSMem<<<dimGrid, dimBlock>>>(d_M, d_N, d_Pk, h_width);
+	cudaMatrixMultWithSMem<<<dimGridSMEM, dimBlockSMEM>>>(d_M, d_N, d_Pk, h_width);
 	cudaErr(cudaDeviceSynchronize());
 	tEnd = omp_get_wtime();
 	printf("Finish GPU MatrixMult SharedMem in %f ms\n\n", 1.e3*(tEnd - tStart));
@@ -141,7 +150,7 @@ int main(int argc, char **argv){
 	cudaErr(cudaMemcpy(h_PkSmem, d_Pk, memSizeErg, cudaMemcpyDeviceToHost));
 	//Matrix testen
 	strcpy(cBetween, "CPU - GPU with smem");
-	checkMatrix(h_Ps, h_PkSmem, h_arraySize,cBetween);
+	checkMatrix(h_Ps, h_PkSmem, h_arraySize, cBetween);
 
 
 	//Alles befreien

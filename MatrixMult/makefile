@@ -18,16 +18,16 @@ OBJECTS = $(OUT_O_DIR)/cudatool.obj \
 					$(OUT_O_DIR)/$(MM_GPU).obj \
 					$(OUT_O_DIR)/main.obj
 
-.PHONY: directories cleanCMD cleanall clean test
+.PHONY: directories cleanCMD cleanall clean test debug setFlags
 
 all: cleanCMD directories $(LINK_TARGET)
 	### All done! ###
 
 clean:
-	 rm -f ${DEBUG_DIR}/*.*
+	 rm -f ${DEBUG_DIR}/*.* ${OUT_O_DIR}/*.*
 
 cleanall:
-	rm -rf ${DEBUG_DIR} ${OUT_O_DIR}
+	rm -rf ${DEBUG_DIR}  ${OUT_O_DIR} *.pdb
 
 directories: ${DEBUG_DIR} ${OUT_O_DIR}
 
@@ -57,5 +57,10 @@ $(LINK_TARGET): $(OBJECTS)
 cleanCMD:
 	cls #clean WindowsCMD
 
+#debug: | setFlags ${LINK_TARGET}
+
+#setFlags:
+#	CFLAGS :=  -g -G $(CFLAGS)
+
 test:
-	cuda-memcheck debug\MatrixMultTool.exe 100 16 16
+	cuda-memcheck --log-file memCheck.log debug\MatrixMultTool.exe 100 16 16
