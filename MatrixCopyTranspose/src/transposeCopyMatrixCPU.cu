@@ -35,6 +35,7 @@ void measureAndBuildserialCopy(float*outM, float* inM, int size, int outerReps, 
 
 void measureAndBuildserialTranspose(float*outM, float* inM, int size, int outerReps, int innerReps){
   int sumReps = 0;
+//  int sizeMem = 0;
   double tStart = 0;
   double tStop = 0;
   float *ctr2Matrix; // compare and proof Matrix

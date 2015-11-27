@@ -23,7 +23,7 @@ __global__ void cudaMatrixMult(float *d_M, float *d_N, double *d_P, int width){
 //Version with shared memory access of MatrixMult on the CUDA GPU
 __global__ void cudaMatrixMultWithSMem(float *d_M, float *d_N, double *d_P, int width){
 	//TODO TILE_WIDTH als Parameter mit geben!!
-	//TODO ablauf pruefen!! Ergebnismatrix ist leer!! wahrscheinlich Grenzen nicht richtig bestimmt!
+	//TODO ablauf pruefen!! Ergebnismatrix ist falsch!! wahrscheinlich Grenzen nicht richtig bestimmt!
 	__shared__ float Mds[TILE_WIDTH][TILE_WIDTH];
 	__shared__ float Nds[TILE_WIDTH][TILE_WIDTH];
 

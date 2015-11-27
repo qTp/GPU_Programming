@@ -1,5 +1,5 @@
-#ifndef TRANSPOSECOPYMATRIXCPU_H_
-#define TRANSPOSECOPYMATRIXCPU_H_
+#ifndef TRANSPOSECOPYMATRIX_CPU_H_
+#define TRANSPOSECOPYMATRIX_CPU_H_
 
 #include "../header/cudatool.h"
 
@@ -8,4 +8,4 @@ void serialTranspose( float* outM, float *inM, int size, int nreps);
 void measureAndBuildserialCopy(float*outM, float* inM, int size, int outerReps, int innerReps);
 void measureAndBuildserialTranspose(float* outM, float* inM, int size, int outerReps, int innerReps);
 
-#endif /* TRANSPOSECOPYMATRIXCPU_H_ */
+#endif /* TRANSPOSECOPYMATRIX_CPU_H_ */

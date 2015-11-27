@@ -2,7 +2,7 @@
 LINK_TARGET= tcMatrix.exe
 CFLAGS = -c -Xcompiler -DDEBUG  -o #-Xcompiler -Wall -> muss in Datei!!!
 CC	= nvcc
-PROG_PARAM = 2048 2048 16
+PROG_PARAM = 1024 1024 16
 
 P_DEBUG = ./debug/
 P_HEADER = ./header/

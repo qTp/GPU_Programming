@@ -11,7 +11,7 @@ cudaError_t cudaErrT(cudaError_t err, int line, char* file){
 #endif
     return err;
 }
-
+//TODO compare muss umgebaut werden zu width * height!!!
 //Matrix gegen einander testen
 void compareMatrix(double *P1, double *P2, int N, char name1[25], char name2[25]){
 #if defined(DEBUG)||defined(_DEBUG)
@@ -28,7 +28,7 @@ void compareMatrix(double *P1, double *P2, int N, char name1[25], char name2[25]
 	//if (match) printf("Arrays match! Compare between %s & %s.\n\n", name1, name2);
 #endif
 }
-
+//TODO compare muss umgebaut werden zu width * height!!!
 //Matrix gegen einander testen
 void compareMatrix(float *P1, float *P2, int N, char name1[25], char name2[25]){
 #if defined(DEBUG)||defined(_DEBUG)

@@ -13,12 +13,12 @@ CUDA_TOOL = cudatool
 MM_CPU = matrixmult_cpu
 MM_GPU = matrixmult_gpu
 
-OBJECTS = $(OUT_O_DIR)/cudatool.obj \
+OBJECTS = $(OUT_O_DIR)/$(CUDA_TOOL).obj \
  					$(OUT_O_DIR)/$(MM_CPU).obj \
 					$(OUT_O_DIR)/$(MM_GPU).obj \
-					$(OUT_O_DIR)/main.obj
+					$(OUT_O_DIR)/$(MAIN).obj
 
-.PHONY: directories cleanCMD cleanall clean test debug setFlags 
+.PHONY: directories cleanCMD cleanall clean test debug setFlags
 
 all: cleanCMD directories $(LINK_TARGET)
 	### All done! ###
@@ -63,4 +63,4 @@ cleanCMD:
 #	CFLAGS :=  -g -G $(CFLAGS)
 
 test:
-	cuda-memcheck --log-file memCheck.log ${DEBUG_DIR}/${LINK_TARGET} 500 32 16
+	cuda-memcheck --log-file memCheck.log ${DEBUG_DIR}/${LINK_TARGET} 10 16 16
