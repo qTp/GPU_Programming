@@ -2,7 +2,8 @@
 LINK_TARGET= tcMatrix.exe
 CFLAGS = -c -Xcompiler -DDEBUG  -o #-Xcompiler -Wall -> muss in Datei!!!
 CC	= nvcc
-PROG_PARAM = 1024 1024 16
+PROG_PARAM = 4096 4096 500
+PROG_PARAM_TEST = 512 512 200
 
 P_DEBUG = ./debug/
 P_HEADER = ./header/
@@ -29,7 +30,7 @@ ${P_GEN}%.obj: ${P_SRC}%.cu ${P_HEADER}%.h
 	$(CC) ${CFLAGS} $@ $<
 
 test:
-	cuda-memcheck --log-file memCheck.log ${P_DEBUG}${LINK_TARGET} ${PROG_PARAM}
+	cuda-memcheck --log-file memCheck.log ${P_DEBUG}${LINK_TARGET} ${PROG_PARAM_TEST}
 
 time:
 	${P_DEBUG}${LINK_TARGET} ${PROG_PARAM}

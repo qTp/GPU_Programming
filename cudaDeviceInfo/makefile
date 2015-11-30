@@ -7,7 +7,7 @@ clean:
 cleanall:
 	rm -f debug/*
 
-compile: cleanCMD debug/cudaTool.obj debug/main.obj
+compile: debug/cudaTool.obj debug/main.obj
 	nvcc debug/main.obj debug/cudaTool.obj -o debug/deviceTool.exe
 
 debug/cudaTool.obj: src/cudatool.cu header/cudatool.h
@@ -16,5 +16,5 @@ debug/cudaTool.obj: src/cudatool.cu header/cudatool.h
 debug/main.obj: src/main.cu
 	nvcc -c src/main.cu -o debug/main.obj
 
-cleanCMD:
-	cls #clean the WindowsCMD
+run:
+	debug/deviceTool.exe
