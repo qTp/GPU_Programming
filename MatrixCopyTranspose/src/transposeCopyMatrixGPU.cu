@@ -3,7 +3,7 @@
 /*
   matrix copy kernel
 */
-__global__ void copyMatrix(float* outMatrix, float* inMatrix, int width, int height, int nreps){
+__global__ void copyMatrix(float* inMatrix, float* outMatrix, int width, int height, int nreps){
   int xIndex = blockIdx.x * TILE_DIM + threadIdx.x;
   int yIndex = blockIdx.y * TILE_DIM + threadIdx.y;
   int memIndex = xIndex + width * yIndex;
@@ -20,7 +20,7 @@ __global__ void copyMatrix(float* outMatrix, float* inMatrix, int width, int hei
 }
 
 //parallel copy kernel invocation
-__host__ void measureCopyKernel(float* inputMatrix, float* ctrCMatrix, dim3 gridDim, dim3 blockDim, int matrixWidth, int matrixHeight, int nReps){
+__host__ void measureKernel(float* inputMatrix, float* ctrMatrix, dim3 gridDim, dim3 blockDim, int matrixWidth, int matrixHeight, int nReps, char *funcName, _kernel_ func){
   int memSizeMatrix = 0;
   int sizeMatrix = 0;
   double tStart = 0;
@@ -28,8 +28,11 @@ __host__ void measureCopyKernel(float* inputMatrix, float* ctrCMatrix, dim3 grid
   float *d_inCopyMatrix; //input Matrix for parallel gpu copy kernel
   float *d_outCopyMatrix; //output Matrix for parallel gpu copy kernel
   float *h_outputCopyMatrix;
-  preProcess("gpu parallel copyMatrix");
 
+  char processName[25] = "GPU ";
+  strcat(processName, funcName);
+
+  preProcess( processName  );
   sizeMatrix = matrixWidth * matrixHeight;
   memSizeMatrix = sizeMatrix * sizeof(float);
 
@@ -42,19 +45,21 @@ __host__ void measureCopyKernel(float* inputMatrix, float* ctrCMatrix, dim3 grid
   cudaErr(cudaDeviceSynchronize());
 
   //Warmup round
-  copyMatrix<<<gridDim,blockDim>>>(d_outCopyMatrix, d_inCopyMatrix, matrixWidth, matrixHeight, 1);
+  func<<<gridDim,blockDim>>>(d_inCopyMatrix, d_outCopyMatrix, matrixWidth, matrixHeight, 1);
 
   //Loop inside
   tStart = omp_get_wtime();
-  copyMatrix<<<gridDim,blockDim>>>(d_outCopyMatrix, d_inCopyMatrix, matrixWidth, matrixHeight, nReps);
-  cudaErr(cudaDeviceSynchronize());
+  for(int i = 0; i < 1; ++i){
+    func<<<gridDim,blockDim>>>(d_inCopyMatrix,d_outCopyMatrix, matrixWidth, matrixHeight, nReps);
+    cudaErr(cudaDeviceSynchronize());
+  }
   tStop = omp_get_wtime();
   postProcess(nReps, sizeMatrix, (tStop-tStart), "inner loop");
 
   //Loop outside
   tStart = omp_get_wtime();
   for(int i = 0; i< nReps; ++i){
-    copyMatrix<<<gridDim,blockDim>>>(d_outCopyMatrix, d_inCopyMatrix, matrixWidth, matrixHeight, 1);
+    func<<<gridDim,blockDim>>>(d_inCopyMatrix,d_outCopyMatrix, matrixWidth, matrixHeight, 1);
     cudaErr(cudaDeviceSynchronize());
   }
   tStop = omp_get_wtime();
@@ -63,8 +68,13 @@ __host__ void measureCopyKernel(float* inputMatrix, float* ctrCMatrix, dim3 grid
   //daten vom devices kopieren!!!
   h_outputCopyMatrix = (float*)malloc(memSizeMatrix);
   cudaErr(cudaMemcpy(h_outputCopyMatrix, d_outCopyMatrix, memSizeMatrix, cudaMemcpyDeviceToHost));
-  //compare Matrix
-  compareMatrix(ctrCMatrix, h_outputCopyMatrix, sizeMatrix, "CPU CopyMatrix","GPU CopyMatrix" );
+
+  //Matrix testen
+  char name1[25] = "CPU ";
+  strcat(name1,funcName);
+  char name2[25] = "GPU ";
+  strcat(name2,funcName);
+  compareMatrix(ctrMatrix, h_outputCopyMatrix, sizeMatrix, name1, name2);
 
   //DevicesSpeicher freigeben
   cudaErr(cudaFree(d_inCopyMatrix));

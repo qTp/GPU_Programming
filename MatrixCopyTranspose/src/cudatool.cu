@@ -60,11 +60,11 @@ void initMatrix(float *ip, int size){
 }
 
 //Ausgabe welcher Teil gestartet wird
-void preProcess(char _name[20]){
+void preProcess(char *_name){
   printf("\n*** Starte %s ***\n", _name );
 }
 //Ausgabe der Ergebnisse
-void postProcess(int reps, int memSize, double tElapsed, char _type[20]){
+void postProcess(int reps, int memSize, double tElapsed, char *_type){
     printf("Type: %s\nTime elapsed: %.5f ms\t",_type , 1e3* (tElapsed / reps ));
     printf("Bandwidth: %.5f GB/s\n", ( ((2. * memSize) / (1024 * 1024 * 1024)) / (tElapsed/ reps) ));
 }

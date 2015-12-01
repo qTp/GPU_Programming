@@ -21,11 +21,13 @@ void measureAndBuildserialCopy(float*outM, float* inM, int size, int nReps){
   double tStart = 0;
   double tStop = 0;
 
-  preProcess("serialCopy");
+  preProcess("CPU serialCopy");
 
   //Loop inside
   tStart = omp_get_wtime();
-  serialCopy(outM, inM, size, nReps);
+  for(int i=0; i < 1; ++i){
+    serialCopy(outM, inM, size, nReps);
+  }
   tStop = omp_get_wtime();
   postProcess(nReps, size * sizeof(float), (tStop-tStart), "inner loop" );
 
@@ -48,13 +50,15 @@ void measureAndBuildserialTranspose(float*outM, float* inM, int size, int nReps)
   double tStop = 0;
   float *ctr2Matrix; // compare and proof Matrix
 
-  preProcess("serialTranspose");
+  preProcess("CPU serialTranspose");
   memSize = sizeof(float) * size;
   ctr2Matrix   = (float*)malloc(memSize);
 
   //Loop inside
   tStart = omp_get_wtime();
-  serialTranspose(outM, inM, size, nReps);
+  for(int i=0; i<1; ++i){
+    serialTranspose(outM, inM, size, nReps);
+  }
   tStop = omp_get_wtime();
   postProcess( nReps, memSize, (tStop - tStart), "inner loop" );
 

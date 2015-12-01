@@ -6,5 +6,4 @@
 #include "../header/transposeCopyMatrixGPU.h"
 #include "../header/transposeCopyMatrixCPU.h"
 
-
 #endif /* MAIN_H_ */
