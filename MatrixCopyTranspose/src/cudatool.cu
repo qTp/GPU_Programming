@@ -22,11 +22,11 @@ void compareMatrix(double *P1, double *P2, int N, char name1[25], char name2[25]
 		if (abs(P1[i] - P2[i]) > epsilon){
 			// match = 0;
 			printf("Arrays do not match!\nCompare between %s & %s!\n", name1, name2);
-			printf("host:%5.10f gpu:%5.10f at Element %d\n\n", P1[i], P2[i], i);
+			printf("M1:%5.10f M2:%5.10f at Element %d\n\n", P1[i], P2[i], i);
 			break;
 		}
 	}
-	// if (match) printf("Arrays match! Compare between %s & %s.\n\n", name1, name2);
+	// if (match) printf("Arrays match!\nCompare between %s & %s.\n\n", name1, name2);
 #endif
 }
 
@@ -39,12 +39,12 @@ void compareMatrix(float *P1, float *P2, int N, char name1[25], char name2[25]){
 	for (int i = 0; i < N; ++i){
 		if (abs(P1[i] - P2[i]) > epsilon){
 			// match = 0;
-			printf("Arrays do not match!\nCompare between %s & %s!\n", name1, name2);
-			printf("host:%5.10f gpu:%5.10f at Element %d\n\n", P1[i], P2[i], i);
+			printf("\nArrays do not match!\nCompare between %s & %s!\n", name1, name2);
+			printf("M1:%5.10f M2:%5.10f at Element %d\n\n", P1[i], P2[i], i);
 			break;
 		}
 	}
-	// if (match) printf("Arrays match! Compare between %s & %s.\n\n", name1, name2);
+	// if (match) printf("Arrays match!\nCompare between %s & %s.\n\n", name1, name2);
 #endif
 }
 
@@ -61,10 +61,16 @@ void initMatrix(float *ip, int size){
 
 //Ausgabe welcher Teil gestartet wird
 void preProcess(char *_name){
-  printf("\n*** Starte %s ***\n", _name );
+  printf("...%s...\n", _name );
 }
-//Ausgabe der Ergebnisse
-void postProcess(int reps, int memSize, double tElapsed, char *_type){
-    printf("Type: %s\nTime elapsed: %.5f ms\t",_type , 1e3* (tElapsed / reps ));
-    printf("Bandwidth: %.5f GB/s\n", ( ((2. * memSize) / (1024 * 1024 * 1024)) / (tElapsed/ reps) ));
+//Ausgabe der Ergebnisse, tElapsed in sekunden
+void postProcessOMP(int nReps, int memSize, double tElapsed, char *_type){
+    printf("Type: %s\tTime elapsed: %.5f ms\t",_type , 1e3* (tElapsed / nReps ));
+    printf("Bandwidth: %.5f GB/s\n", ( ((2. * memSize) / (1024 * 1024 * 1024)) / (tElapsed / nReps) ));
+}
+
+//Ausgabe der Ergebnisse, tElapsed in millisekunden
+void postProcess(int nReps, int memSize, double tElapsed, char *_type){
+    printf("Type: %s\tTime elapsed: %.5f ms\t",_type , (tElapsed / nReps ));
+    printf("Bandwidth: %.5f GB/s\n", ( ((2. * memSize) / (1024 * 1024 * 1024)) / ((tElapsed / 1e3) / nReps) ));
 }

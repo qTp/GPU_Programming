@@ -8,7 +8,7 @@ void serialCopy(float *outM, float* inM, int size, int nreps){
     }
   }
 }
-
+//haha...das ist kein transpose ... ich drehe einfach nur den speicher um =))
 void serialTranspose( float* outM, float *inM, int size, int nreps){
   for(int measure = 0; measure < nreps; ++measure){
     for(int i = 0; i < size; i++){
@@ -29,7 +29,7 @@ void measureAndBuildserialCopy(float*outM, float* inM, int size, int nReps){
     serialCopy(outM, inM, size, nReps);
   }
   tStop = omp_get_wtime();
-  postProcess(nReps, size * sizeof(float), (tStop-tStart), "inner loop" );
+  postProcessOMP(nReps, size * sizeof(float), (tStop-tStart), "inner loop" );
 
   //Loop outside
   tStart = omp_get_wtime();
@@ -37,7 +37,7 @@ void measureAndBuildserialCopy(float*outM, float* inM, int size, int nReps){
     serialCopy(outM, inM, size, 1);
   }
   tStop = omp_get_wtime();
-  postProcess(nReps, size * sizeof(float), (tStop-tStart), "outer loop" );
+  postProcessOMP(nReps, size * sizeof(float), (tStop-tStart), "outer loop" );
 
   //Ergebnis auch testen!
   compareMatrix(inM, outM, size, "inputMatrix", "serialCopy");
@@ -60,7 +60,7 @@ void measureAndBuildserialTranspose(float*outM, float* inM, int size, int nReps)
     serialTranspose(outM, inM, size, nReps);
   }
   tStop = omp_get_wtime();
-  postProcess( nReps, memSize, (tStop - tStart), "inner loop" );
+  postProcessOMP( nReps, memSize, (tStop - tStart), "inner loop" );
 
   //Loop outside
   tStart = omp_get_wtime();
@@ -68,7 +68,7 @@ void measureAndBuildserialTranspose(float*outM, float* inM, int size, int nReps)
     serialTranspose(outM, inM, size, 1);
   }
   tStop = omp_get_wtime();
-  postProcess( nReps, memSize, (tStop - tStart), "outer loop" );
+  postProcessOMP( nReps, memSize, (tStop - tStart), "outer loop" );
 
   //Ergebnis auch testen!
   //nach zweitem Transpose muss Matrix wieder im Original zustand sein!

@@ -39,16 +39,26 @@ int main(int argc, char**argv){
 
     printf("\nGPU Device: %s\n", dev_prop->name );
     printf("WarpSize: %d, ThreadsPerMP: %d\n", dev_prop->warpSize, dev_prop->maxThreadsPerMultiProcessor);
-    printf("\nMatrix dimension: width=%d, height=%d\n", matrixWidth, matrixHeight);
+    //TODO theoretical bandwidth bestimmen!!
+    /*
+    In this calculation, we convert the memory clock rate to Hz,
+    multiply it by the interface width (divided by 8, to convert bits to bytes)
+    and multiply by 2 due to the double data rate.
+     Finally, we divide by 1e9 to convert the result to GB/s.
+
+     http://devblogs.nvidia.com/parallelforall/how-implement-performance-metrics-cuda-cc/
+    */
+    printf("theoretical bandwidth: %.2f GB/s\n", dev_prop->memoryClockRate * 1e3 * (dev_prop->memoryBusWidth / 8) * 2  / 1e9);
+    printf("Matrix dimension: width=%d, height=%d\n", matrixWidth, matrixHeight);
     printf("Wiederholungen fuer Zeitmessung: %d\n", nReps);
     printf("Grid dimension: x=%d, y=%d, z=%d\n",gridDim.x, gridDim.y, gridDim.z);
-    printf("Block dimension: x=%d, y=%d, z=%d\n",blockDim.x, blockDim.y, blockDim.z);
+    printf("Block dimension: x=%d, y=%d, z=%d\n\n",blockDim.x, blockDim.y, blockDim.z);
 
   }else{
     printf("Wrong paramter!\n\n");
     exit(EXIT_FAILURE);
   }
-  
+
   //speicherbedarf bestimmen
   int sizeMatrix = matrixWidth * matrixHeight;
   int memSizeMatrix = ( sizeof(float) * sizeMatrix );
@@ -57,20 +67,23 @@ int main(int argc, char**argv){
   inputMatrix = (float*)malloc(memSizeMatrix);
   ctrTMatrix = (float*)malloc(memSizeMatrix);
   ctrCMatrix = (float*)malloc(memSizeMatrix);
-  //goldMatrix = (float*)malloc(memSizeMatrix);
 
   //create inputMatrix
   initMatrix(inputMatrix, sizeMatrix);
 
+#if defined(DEBUG)||defined(_DEBUG)
   //create control Matrix for COPY test!
   measureAndBuildserialCopy(ctrCMatrix, inputMatrix, sizeMatrix, nReps);
-
   //create control Matrix for TRANSPOSE test!
   measureAndBuildserialTranspose(ctrTMatrix, inputMatrix, sizeMatrix, nReps);
+#else
+  serialCopy(ctrCMatrix, inputMatrix, sizeMatrix, 1);
+  serialTranspose(ctrTMatrix, inputMatrix, sizeMatrix, 1);
+#endif
 
   //schleife ueber alle Kernel Funktionen!!!
   // i = anzahl an KernelFunktionen ;-)
-  for(int i = 0; i<1; ++i){
+  for(int i = 0; i<2; ++i){
     switch(i){
       case 0:
         //create and measure CopyKernel
@@ -79,9 +92,14 @@ int main(int argc, char**argv){
         goldMatrix = ctrCMatrix;
         break;
       case 1:
+        kernelFunc = &transposeMatrix;
+        funcName = "transposeMatrix\0";
+        goldMatrix = ctrTMatrix;
         break;
     }
-    //ein call mit der jeweiligen KernelFunc und der ControlMatrix!!!
+
+    measureKernelOMP(inputMatrix, goldMatrix, gridDim, blockDim, matrixWidth, matrixHeight, nReps,funcName, kernelFunc);
+
     measureKernel(inputMatrix, goldMatrix, gridDim, blockDim, matrixWidth, matrixHeight, nReps,funcName, kernelFunc);
   }
   //Aufraeumen nicht vergessen!!!
