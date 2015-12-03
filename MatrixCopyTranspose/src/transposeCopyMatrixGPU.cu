@@ -13,7 +13,7 @@ __global__ void copyMatrix(float* outMatrix, float* inMatrix, int width, int hei
     for(int i = 0; i < TILE_DIM; i+=BLOCK_ROWS){
       outMatrix[memIndex + i * width] = inMatrix[memIndex + i * width];
     }
-    __syncthreads();
+    //__syncthreads();
     //workloop
   }
   //measureloop
@@ -32,7 +32,7 @@ __global__ void transposeMatrix(float* outMatrix, float* inMatrix, int width, in
     for(int i = 0; i < TILE_DIM; i+=BLOCK_ROWS){
       outMatrix[outIndex + i] = inMatrix[inIndex + i * width];
     }
-    __syncthreads();
+    //__syncthreads();
     //workloop
   }
   //measureloop

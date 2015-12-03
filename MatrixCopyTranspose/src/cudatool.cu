@@ -66,11 +66,11 @@ void preProcess(char *_name){
 //Ausgabe der Ergebnisse, tElapsed in sekunden
 void postProcessOMP(int nReps, int memSize, double tElapsed, char *_type){
     printf("Type: %s\tTime elapsed: %.5f ms\t",_type , 1e3* (tElapsed / nReps ));
-    printf("Bandwidth: %.3f GB/s\n", ( ((2. * memSize) / (1024 * 1024 * 1024)) / (tElapsed / nReps) ));
+    printf("Bandwidth: %.3f GB/s\n", ( ((2. * memSize) / (BYTE_TO_GBYTE)) / (tElapsed / nReps) ));
 }
 
 //Ausgabe der Ergebnisse, tElapsed in millisekunden
 void postProcess(int nReps, int memSize, double tElapsed, char *_type){
     printf("Type: %s\tTime elapsed: %.5f ms\t",_type , (tElapsed / nReps ));
-    printf("Bandwidth: %.3f GB/s\n", ( ((2. * memSize) / (1024 * 1024 * 1024)) / ((tElapsed / 1e3) / nReps) ));
+    printf("Bandwidth: %.3f GB/s\n", ( ((2. * memSize) / (BYTE_TO_GBYTE)) / ((tElapsed / 1e3) / nReps) ));
 }

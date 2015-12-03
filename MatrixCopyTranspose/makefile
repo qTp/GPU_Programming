@@ -1,9 +1,11 @@
 
 LINK_TARGET= tcMatrix.exe
-CFLAGS = -Xcompiler -DDEBUG -arch=sm_20 -c -o #-Xcompiler -Wall-> muss in Datei!!! total simple einfach so aufrufen = make > compiler.log 2>&1
+CFLAGS = -Xcompiler -DDEBUG -arch=sm_20 -c -o
+#-Xcompiler -Wall-> muss in Datei!!! total simple einfach so aufrufen = make > compiler.log 2>&1
+#-Xcompiler -DSERIAL
 CC	= nvcc
-PROG_PARAM = 2048 2048 500
-PROG_PARAM_TEST = 256 256 200
+PROG_PARAM = 2048 2048 200
+PROG_PARAM_TEST = 256 256 20
 
 P_DEBUG = ./debug/
 P_HEADER = ./header/

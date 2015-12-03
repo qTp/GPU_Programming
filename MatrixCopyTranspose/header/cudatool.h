@@ -10,6 +10,8 @@
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
 
+#define BYTE_TO_GBYTE 1073741824
+
 #define cudaErr(err) cudaErrT(err, __LINE__,__FILE__)
 cudaError_t cudaErrT(cudaError_t err, int line, char* file );
 

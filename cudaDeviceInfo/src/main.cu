@@ -53,7 +53,7 @@ int main(int argc, char **argv){
 	for(int i=0; i<dev_count;i++){
 		cudaErr(cudaGetDeviceProperties(&dev_prop[i],i));
 		printf("Following properties are read for the device: %d\n", i+1);
-		printf("Name: %s\nGlobalMem: %Iu\n", dev_prop->name, -1e-6*dev_prop->totalGlobalMem);
+		printf("Name: %s\nGlobalMem: %Iu\n", dev_prop->name, dev_prop->totalGlobalMem);
 		printf("sharedMemPerBLock: %Iu\tregsPerBlock: %d\n", dev_prop->sharedMemPerBlock, dev_prop->regsPerBlock);
 		printf("warpSize: %d\nmemPitch: %Iu\n", dev_prop->warpSize, dev_prop->memPitch);
 		printf("clockRate: %d\ntotalConstMem: %Iu\n", dev_prop->clockRate, dev_prop->totalConstMem);
