@@ -1,0 +1,31 @@
+Unter WIndows und wenn die Grafikkarte auch als Display devices genutzt wird, überprüft windows nach (default 2sec) das Gerät (GPU).
+Wenn der Kernel das devices zulange benutzt ( >2s) wird Windows den Kernel terminieren!!! 
+Kann über RegKey ausgelschaltet werden.
+
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\GraphicsDrivers]
+"TdrLevel"=dword:0000000
+
+schaltet den Watchdog aus!
+
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\GraphicsDrivers]
+"TdrLevel"=dword:00000003
+
+schaltt den watchdog ein!
+
+Beides benötigt einen neustart von Windows!
+
+Info von:
+http://stackoverflow.com/questions/6182151/cuda-program-causes-nvidia-driver-to-crash
+
+Best Answer:
+If smaller numbers of trials work correctly, and if you are running on MS Windows without the NVIDIA Tesla Compute Cluster (TCC) driver 
+and/or the GPU you are using is attached to a display, then you are probably exceeding the operating system's "watchdog" timeout. 
+If the kernel occupies the display device (or any GPU on Windows without TCC) for too long, 
+the OS will kill the kernel so that the system does not become non-interactive.
+
+The solution is to run on a non-display-attached GPU and if you are on Windows, 
+use the TCC driver. Otherwise, you will need to reduce the number of trials in your kernel 
+and run the kernel multiple times to compute the number of trials you need.
+
+Add by me:
+Geforce devices can't use TCC driver!
