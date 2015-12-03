@@ -49,10 +49,10 @@ int main(int argc, char**argv){
      http://devblogs.nvidia.com/parallelforall/how-implement-performance-metrics-cuda-cc/
     */
     printf("theoretical bandwidth: %.2f GB/s\n", dev_prop->memoryClockRate * 1e3 * (dev_prop->memoryBusWidth / 8) * 2  / 1e9);
-    printf("Matrix dimension: width=%d, height=%d\n", matrixWidth, matrixHeight);
     printf("Wiederholungen fuer Zeitmessung: %d\n", nReps);
-    printf("Grid dimension: x=%d, y=%d, z=%d\n",gridDim.x, gridDim.y, gridDim.z);
-    printf("Block dimension: x=%d, y=%d, z=%d\n\n",blockDim.x, blockDim.y, blockDim.z);
+    printf("Matrix dimension: width=%d, height=%d\n", matrixWidth, matrixHeight);
+    printf("Grid(%d,%d,%d)",gridDim.x, gridDim.y, gridDim.z);
+    printf(" Block(%d,%d,%d)\n\n",blockDim.x, blockDim.y, blockDim.z);
 
   }else{
     printf("Wrong paramter!\n\n");
@@ -73,12 +73,12 @@ int main(int argc, char**argv){
 
 #if defined(DEBUG)||defined(_DEBUG)
   //create control Matrix for COPY test!
-  measureAndBuildserialCopy(ctrCMatrix, inputMatrix, sizeMatrix, nReps);
+  measureAndBuildserialCopy(ctrCMatrix, inputMatrix, matrixWidth, matrixHeight, nReps);
   //create control Matrix for TRANSPOSE test!
-  measureAndBuildserialTranspose(ctrTMatrix, inputMatrix, sizeMatrix, nReps);
+  measureAndBuildserialTranspose(ctrTMatrix, inputMatrix, matrixWidth, matrixHeight, nReps);
 #else
-  serialCopy(ctrCMatrix, inputMatrix, sizeMatrix, 1);
-  serialTranspose(ctrTMatrix, inputMatrix, sizeMatrix, 1);
+  serialCopy(ctrCMatrix, inputMatrix, matrixWidth, matrixHeight, 1);
+  serialTranspose(ctrTMatrix, inputMatrix, matrixWidth, matrixHeight, 1);
 #endif
 
   //schleife ueber alle Kernel Funktionen!!!

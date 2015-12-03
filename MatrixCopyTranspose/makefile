@@ -30,10 +30,10 @@ ${P_GEN}%.obj: ${P_SRC}%.cu ${P_HEADER}%.h
 	$(CC) ${CFLAGS} $@ $<
 
 test:
-	cuda-memcheck --log-file memCheck.log ${P_DEBUG}${LINK_TARGET} ${PROG_PARAM_TEST}
+	cuda-memcheck --log-file memCheck.log ${P_GEN}${LINK_TARGET} ${PROG_PARAM_TEST}
 
 time:
-	${P_DEBUG}${LINK_TARGET} ${PROG_PARAM}
+	${P_GEN}${LINK_TARGET} ${PROG_PARAM}
 
 clean:
 	rm -f ${P_DEBUG}*.* *.log
