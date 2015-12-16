@@ -6,7 +6,7 @@ CFLAGS = -Xcompiler -fopenmp -arch=sm_20 -c -o
 CC	= nvcc
 PROG_PARAM = 4096 4096 500
 PROG_PARAM_TEST = 256 256 20
-
+# test comment
 P_DEBUG = ./debug/
 P_HEADER = ./header/
 P_SRC = ./src/
