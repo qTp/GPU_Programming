@@ -1,19 +1,19 @@
-
 LINK_TARGET= tcMatrix.exe
-CFLAGS = -Xcompiler -DDEBUG -arch=sm_20 -c -o
+CFLAGS = -Xcompiler -fopenmp -arch=sm_20 -c -o
 #-Xcompiler -Wall-> muss in Datei!!! total simple einfach so aufrufen = make > compiler.log 2>&1
 #-Xcompiler -DSERIAL
+#-Xcompiler -DDEBUG
 CC	= nvcc
-PROG_PARAM = 2048 2048 200
+PROG_PARAM = 4096 4096 500
 PROG_PARAM_TEST = 256 256 20
 
 P_DEBUG = ./debug/
 P_HEADER = ./header/
 P_SRC = ./src/
-###############################
-# path for generaten					#
+#################################
+# path for generaten		#
 # for simplification P_DEBUG	#
-###############################
+#################################
 P_GEN = ${P_DEBUG}
 
 files= cudatool transposeCopyMatrixGPU transposeCopyMatrixCPU main
@@ -26,7 +26,7 @@ all: ${LINK_TARGET}
 	### All done! ###
 
 ${LINK_TARGET}: ${OBJECTS}
-	${CC} ${OBJECTS} -o ${P_GEN}$(LINK_TARGET)
+	${CC} -lgomp ${OBJECTS} -o ${P_GEN}$(LINK_TARGET)
 
 ${P_GEN}%.obj: ${P_SRC}%.cu ${P_HEADER}%.h
 	$(CC) ${CFLAGS} $@ $<

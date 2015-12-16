@@ -43,14 +43,14 @@ int main(int argc, char**argv){
   cudaErr(cudaGetDeviceProperties(dev_prop,0));
   cudaErr(cudaMemGetInfo(&freeMem, &totalMem));
   //ende
-  
+
   printf("\nGPU Device: %s\n", dev_prop->name );
   float gMemGB = (dev_prop->totalGlobalMem / BYTE_TO_GBYTE );
   printf("WarpSize: %d, ThreadsPerMP: %d globalMem: %.2f GB\n",
           dev_prop->warpSize,
           dev_prop->maxThreadsPerMultiProcessor,
           gMemGB );
-  printf("Free = %Iu, Total = %Iu\n", freeMem, totalMem);
+  printf("Free = %Iu, Total = %Iu\n", (unsigned int)freeMem, (unsigned int)totalMem);
   /*
   In this calculation, we convert the memory clock rate to Hz,
   multiply it by the interface width (divided by 8, to convert bits to bytes)
@@ -99,7 +99,7 @@ int main(int argc, char**argv){
         break;
     }
 
-    measureKernelOMP(inputMatrix, goldMatrix, gridDim, blockDim, matrixWidth, matrixHeight, nReps,funcName, kernelFunc);
+    // measureKernelOMP(inputMatrix, goldMatrix, gridDim, blockDim, matrixWidth, matrixHeight, nReps,funcName, kernelFunc);
 
     measureKernel(inputMatrix, goldMatrix, gridDim, blockDim, matrixWidth, matrixHeight, nReps,funcName, kernelFunc);
   }

@@ -53,14 +53,14 @@ int main(int argc, char **argv){
 	for(int i=0; i<dev_count;i++){
 		cudaErr(cudaGetDeviceProperties(&dev_prop[i],i));
 		printf("Following properties are read for the device: %d\n", i+1);
-		printf("Name: %s\nGlobalMem: %Iu\n", dev_prop->name, dev_prop->totalGlobalMem);
-		printf("sharedMemPerBLock: %Iu\tregsPerBlock: %d\n", dev_prop->sharedMemPerBlock, dev_prop->regsPerBlock);
-		printf("warpSize: %d\nmemPitch: %Iu\n", dev_prop->warpSize, dev_prop->memPitch);
-		printf("clockRate: %d\ntotalConstMem: %Iu\n", dev_prop->clockRate, dev_prop->totalConstMem);
+		printf("Name: %s\nGlobalMem: %Zu\n", dev_prop->name, dev_prop->totalGlobalMem);
+		printf("sharedMemPerBLock: %Zu\tregsPerBlock: %d\n", dev_prop->sharedMemPerBlock, dev_prop->regsPerBlock);
+		printf("warpSize: %d\nmemPitch: %Zu\n", dev_prop->warpSize, dev_prop->memPitch);
+		printf("clockRate: %d\ntotalConstMem: %Zu\n", dev_prop->clockRate, dev_prop->totalConstMem);
 		printf("maxThreadsPerBlock: %d\n", dev_prop->maxThreadsPerBlock);
 		printf("maxThreadDim[3]: %d %d %d\n", dev_prop->maxThreadsDim[0],dev_prop->maxThreadsDim[1],dev_prop->maxThreadsDim[2]);
 		printf("maxGridSize[3]: %d %d %d\n",	dev_prop->maxGridSize[0],dev_prop->maxGridSize[1],dev_prop->maxGridSize[2] );
-		printf("totalConstMem: %d\n",	dev_prop->totalConstMem);
+		printf("totalConstMem: %Zu\n",	dev_prop->totalConstMem);
 		printf("major | minor: %d | %d\n",	dev_prop->major,dev_prop->minor );
 		printf("memoryClockRate: %d | memoryBusWidth: %d\n",dev_prop->memoryClockRate, dev_prop->memoryBusWidth);
 		printf("maxThreadsPerMultiProcessor: %d\n", dev_prop->maxThreadsPerMultiProcessor);
